@@ -1,9 +1,10 @@
 from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash, request, requests, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, session
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
 from mongodb.config.connection_db import get_database
 from utils.decorators import login_required
+import requests
 import os
 import cv2 as cv
 import numpy as np
@@ -40,7 +41,23 @@ def upload_weapon_form():
 
 @upload_bp.route('/upload', methods=['POST'])
 @login_required
-def upload_weapon():            
+def upload_weapon():   
+
+    #test de l'image
+
+    image = request.files.get("file")  # "file" = nom du champ utilisé dans React
+
+    if not image:
+        return jsonify({"error": "Aucun fichier reçu."}), 400
+
+    from uuid import uuid4
+    ext = image.filename.split('.')[-1]
+    filename = f"{uuid4()}.{ext}"
+    image_path = os.path.join(UPLOAD_FOLDER, filename)
+    image.save(image_path)
+
+    return jsonify({"filename": filename}), 200
+
     """
     Traiter le formulaire de création d'une nouvelle arme.
     """

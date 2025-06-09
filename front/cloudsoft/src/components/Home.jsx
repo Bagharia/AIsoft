@@ -28,10 +28,45 @@ const Home = () => {
         setPreview(URL.createObjectURL(file));
     };
 
-    const goToDownload = () => {
+    const goToDownload = async () => {
         if (!file || !preview) return;
-        navigate("/analyze", { state: { file, preview } });
+         const uploadedFileName = await uploadToBackend();
+        if (uploadedFileName) {
+            navigate("/analyze", {
+                state: {
+                    file,
+                    preview,
+                    filename: uploadedFileName, // pour utilisation dans /analyze
+                },
+            });
+        }
     };
+
+    const uploadToBackend = async () => {
+        if (!file) return;
+
+        const formData = new FormData();
+          formData.append("file", file);
+
+        try {
+            const response = await fetch("http://127.0.0.1:5000/weapon/upload", {
+                method: "POST",
+                body: formData,
+                credentials: "include",
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Image uploadée :", data.filename);
+                return data.filename;
+            } else {
+                console.error("Erreur de l'upload :", data.error);
+            }
+        } catch (error) {
+            console.error("Erreur réseau :", error);
+        }
+    }
 
     useEffect(() => {
         fetch("http://127.0.0.1:5000/")

@@ -3,6 +3,7 @@ from flask_cors import CORS
 from mongodb.config.connection_db import get_database
 from api.routes.auth import auth_bp 
 from dotenv import load_dotenv
+from api.routes.weapon import upload_bp, process_bp, identify_bp 
 import os
 
 load_dotenv()
@@ -16,6 +17,9 @@ CORS(app, supports_credentials=True)
 db = get_database()
 
 app.register_blueprint(auth_bp)
+app.register_blueprint(upload_bp, url_prefix="/weapon")
+app.register_blueprint(process_bp, url_prefix="/weapon")
+app.register_blueprint(identify_bp, url_prefix="/weapon")
 
 @app.route('/')
 def index():
